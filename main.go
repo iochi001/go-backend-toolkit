@@ -2,16 +2,20 @@ package main
 
 import "fmt"
 
-func main() {
-    appName := "Go Backend Toolkit"
-    version := "1.0.0"
-
-    fmt.Println("Application:", appName)
-    fmt.Println("Version:", version)
-
-    greet()
+type Note struct {
+    ID      int
+    Title   string
+    Content string
 }
 
-func greet() {
-    fmt.Println("Welcome! Let's build something.")
+func main() {
+    note := Note{
+        ID:      1,
+        Title:   "My first note",
+        Content: "I am learning Go backend development",
+    }
+
+    fmt.Println("Note ID:", note.ID)
+    fmt.Println("Title:", note.Title)
+    fmt.Println("Content:", note.Content)
 }
