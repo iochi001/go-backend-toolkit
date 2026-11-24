@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type Note struct {
     ID      int
@@ -8,79 +11,72 @@ type Note struct {
     Content string
 }
 
-func CreateNote(notes map[int]Note, note Note) {
+func ValidateNote(note Note) error {
+    if strings.TrimSpace(note.Title) == "" {
+        return fmt.Errorf("note title cannot be empty")
+    }
+
+    if strings.TrimSpace(note.Content) == "" {
+        return fmt.Errorf("note content cannot be empty")
+    }
+
+    return nil
+}
+
+func CreateNote(notes map[int]Note, note Note) error {
+    if err := ValidateNote(note); err != nil {
+        return err
+    }
+
+    if _, exists := notes[note.ID]; exists {
+        return fmt.Errorf("note with ID %d already exists", note.ID)
+    }
+
     notes[note.ID] = note
+    return nil
 }
 
-func ListNotes(notes map[int]Note) {
-    for _, note := range notes {
-        fmt.Println("ID:", note.ID)
-        fmt.Println("Title:", note.Title)
-        fmt.Println("Content:", note.Content)
-        fmt.Println("----------------")
-    }
-}
-
-func FindNote(notes map[int]Note, id int) {
+func FindNote(notes map[int]Note, id int) (Note, error) {
     note, exists := notes[id]
 
     if !exists {
-        fmt.Println("Note not found")
-        return
+        return Note{}, fmt.Errorf("note with ID %d not found", id)
     }
 
-    fmt.Println("Found:", note.Title)
-}
-
-func UpdateNote(notes map[int]Note, id int, newTitle string) {
-    note, exists := notes[id]
-
-    if !exists {
-        fmt.Println("Note not found")
-        return
-    }
-
-    note.Title = newTitle
-    notes[id] = note
-}
-
-func DeleteNote(notes map[int]Note, id int) {
-    if _, exists := notes[id]; !exists {
-        fmt.Println("Note not found")
-        return
-    }
-
-    delete(notes, id)
-    fmt.Println("Note deleted")
+    return note, nil
 }
 
 func main() {
     notes := make(map[int]Note)
 
-    CreateNote(notes, Note{
+    note := Note{
         ID:      1,
         Title:   "Learning Go",
-        Content: "Understanding Go fundamentals",
-    })
+        Content: "Understanding error handling",
+    }
 
-    CreateNote(notes, Note{
+    if err := CreateNote(notes, note); err != nil {
+        fmt.Println("Create error:", err)
+    } else {
+        fmt.Println("Note created successfully")
+    }
+
+    foundNote, err := FindNote(notes, 1)
+
+    if err != nil {
+        fmt.Println("Find error:", err)
+    } else {
+        fmt.Println("Found note:", foundNote.Title)
+    }
+
+    // Try creating an invalid note.
+    invalidNote := Note{
         ID:      2,
-        Title:   "Learning SQL",
-        Content: "Understanding databases",
-    })
+        Title:   "   ",
+        Content: "This note has no valid title",
+    }
 
-    fmt.Println("ALL NOTES")
-    ListNotes(notes)
-
-    fmt.Println("\nFIND NOTE")
-    FindNote(notes, 1)
-
-    fmt.Println("\nUPDATE NOTE")
-    UpdateNote(notes, 1, "Learning Go Backend")
-
-    fmt.Println("\nDELETE NOTE")
-    DeleteNote(notes, 2)
-
-    fmt.Println("\nFINAL NOTES")
-    ListNotes(notes)
+    if err := CreateNote(notes, invalidNote); err != nil {
+        fmt.Println("Validation error:", err)
+    }
 }
