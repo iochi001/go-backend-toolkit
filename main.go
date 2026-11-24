@@ -8,28 +8,34 @@ type Note struct {
     Content string
 }
 
-func (n Note) Display() {
-    fmt.Println("Note ID:", n.ID)
-    fmt.Println("Title:", n.Title)
-    fmt.Println("Content:", n.Content)
-}
-
-func (n *Note) UpdateTitle(newTitle string) {
-    n.Title = newTitle
+func ListNotes(notes []Note) {
+    for _, note := range notes {
+        fmt.Println("ID:", note.ID)
+        fmt.Println("Title:", note.Title)
+        fmt.Println("Content:", note.Content)
+        fmt.Println("----------------")
+    }
 }
 
 func main() {
-    note := Note{
-        ID:      1,
-        Title:   "My first note",
-        Content: "Learning backend development",
+    notes := []Note{
+        {
+            ID:      1,
+            Title:   "Go fundamentals",
+            Content: "Learning structs and methods",
+        },
+        {
+            ID:      2,
+            Title:   "Backend development",
+            Content: "Learning application architecture",
+        },
     }
 
-    fmt.Println("Before update:")
-    note.Display()
+    notes = append(notes, Note{
+        ID:      3,
+        Title:   "Database fundamentals",
+        Content: "Learning PostgreSQL",
+    })
 
-    note.UpdateTitle("Learning Go properly")
-
-    fmt.Println("\nAfter update:")
-    note.Display()
+    ListNotes(notes)
 }
