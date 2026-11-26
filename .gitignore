@@ -1,0 +1,15 @@
+# Runtime data
+notes.json
+
+# Environment variables and secrets
+.env
+.env.*
+
+# Build output
+bin/
+dist/
+go-backend-toolkit
+
+# Logs and test coverage
+*.log
+coverage.out
