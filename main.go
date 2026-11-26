@@ -2,20 +2,35 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"go-backend-toolkit/internal/notes"
+	"go-backend-toolkit/internal/storage"
 )
 
 func main() {
-	noteStore := make(map[int]notes.Note)
+	filename := "notes.json"
+
+	// Load existing notes.
+	noteStore, err := storage.LoadNotes(filename)
+
+	if err != nil {
+		if os.IsNotExist(err) {
+			noteStore = make(map[int]notes.Note)
+		} else {
+			fmt.Println("Loading error:", err)
+			return
+		}
+	}
 
 	note := notes.Note{
 		ID:      1,
 		Title:   "Learning Go",
-		Content: "Understanding packages",
+		Content: "Understanding persistent storage",
 	}
 
-	err := notes.CreateNote(noteStore, note)
+	// Create the note.
+	err = notes.CreateNote(noteStore, note)
 
 	if err != nil {
 		fmt.Println("Create error:", err)
@@ -23,6 +38,17 @@ func main() {
 		fmt.Println("Note created successfully")
 	}
 
+	// Save notes.
+	err = storage.SaveNotes(filename, noteStore)
+
+	if err != nil {
+		fmt.Println("Saving error:", err)
+		return
+	}
+
+	fmt.Println("Notes saved successfully")
+
+	// Find the note.
 	foundNote, err := notes.FindNote(noteStore, 1)
 
 	if err != nil {
