@@ -33,6 +33,9 @@ func main() {
 	case "view":
 		handleView(os.Args[2:])
 
+	case "update":
+		handleUpdate(os.Args[2:])
+
 	default:
 		fmt.Println("Unknown command:", command)
 		showHelp()
@@ -47,6 +50,7 @@ func showHelp() {
 	fmt.Println("  create <title> <content>         Create a new note")
 	fmt.Println("  list                              List all notes")
 	fmt.Println("  view <id>                         View a note by ID")
+	fmt.Println("  update <id> <title> <content>    Update a note by ID")
 }
 
 func handleCreate(args []string) {
@@ -185,4 +189,40 @@ func handleView(args []string) {
 	fmt.Printf("Title:   %s\n", note.Title)
 	fmt.Printf("Content: %s\n", note.Content)
 	fmt.Println("------------------------------")
+}
+
+func handleUpdate(args []string) {
+	if len(args) < 3 {
+		fmt.Println("Usage: go run . update <id> <title> <content>")
+		return
+	}
+
+	id, err := strconv.Atoi(args[0])
+	if err != nil {
+		fmt.Println("Invalid note ID. Please provide a number.")
+		return
+	}
+
+	noteStore, err := loadNoteStore()
+	if err != nil {
+		fmt.Println("Loading error:", err)
+		return
+	}
+
+	updatedNote := notes.Note{
+		Title:   args[1],
+		Content: args[2],
+	}
+
+	if err := notes.UpdateNote(noteStore, id, updatedNote); err != nil {
+		fmt.Println("Update error:", err)
+		return
+	}
+
+	if err := storage.SaveNotes(notesFile, noteStore); err != nil {
+		fmt.Println("Saving error:", err)
+		return
+	}
+
+	fmt.Println("Note updated successfully. ID:", id)
 }

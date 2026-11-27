@@ -1,4 +1,3 @@
-
 package notes
 
 import (
@@ -45,4 +44,19 @@ func FindNote(notes map[int]Note, id int) (Note, error) {
 	}
 
 	return note, nil
+}
+
+func UpdateNote(noteStore map[int]Note, id int, updatedNote Note) error {
+	if _, exists := noteStore[id]; !exists {
+		return fmt.Errorf("note with ID %d not found", id)
+	}
+
+	if err := ValidateNote(updatedNote); err != nil {
+		return err
+	}
+
+	updatedNote.ID = id
+	noteStore[id] = updatedNote
+
+	return nil
 }
