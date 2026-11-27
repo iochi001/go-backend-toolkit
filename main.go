@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"sort"
 
 	"go-backend-toolkit/internal/notes"
 	"go-backend-toolkit/internal/storage"
@@ -117,10 +118,23 @@ func handleList() {
 		return
 	}
 
+	// Extract note IDs into a slice.
+	var ids []int
+
+	for id := range noteStore {
+		ids = append(ids, id)
+	}
+
+	// Sort IDs in ascending order.
+	sort.Ints(ids)
+
 	fmt.Println("Your Notes")
 	fmt.Println("------------------------------")
 
-	for id, note := range noteStore {
+	// Display notes using sorted IDs.
+	for _, id := range ids {
+		note := noteStore[id]
+
 		fmt.Printf("ID:      %d\n", id)
 		fmt.Printf("Title:   %s\n", note.Title)
 		fmt.Printf("Content: %s\n", note.Content)
