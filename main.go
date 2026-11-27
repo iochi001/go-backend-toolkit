@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"sort"
+	"strconv"
 
 	"go-backend-toolkit/internal/notes"
 	"go-backend-toolkit/internal/storage"
@@ -29,6 +30,9 @@ func main() {
 	case "list":
 		handleList()
 
+	case "view":
+		handleView(os.Args[2:])
+
 	default:
 		fmt.Println("Unknown command:", command)
 		showHelp()
@@ -42,6 +46,7 @@ func showHelp() {
 	fmt.Println("  help                              Show available commands")
 	fmt.Println("  create <title> <content>         Create a new note")
 	fmt.Println("  list                              List all notes")
+	fmt.Println("  view <id>                         View a note by ID")
 }
 
 func handleCreate(args []string) {
@@ -143,4 +148,41 @@ func handleList() {
 
 	fmt.Println("------------------------------")
 	fmt.Printf("Total notes: %d\n", len(noteStore))
+}
+
+func handleView(args []string) {
+	// Check that the user supplied an ID.
+	if len(args) < 1 {
+		fmt.Println("Usage: go run . view <id>")
+		return
+	}
+
+	// Convert the string ID into an integer.
+	id, err := strconv.Atoi(args[0])
+	if err != nil {
+		fmt.Println("Invalid note ID. Please provide a number.")
+		return
+	}
+
+	// Load existing notes.
+	noteStore, err := loadNoteStore()
+	if err != nil {
+		fmt.Println("Loading error:", err)
+		return
+	}
+
+	// Find the requested note.
+	note, err := notes.FindNote(noteStore, id)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+
+	// Display the note.
+	fmt.Println("Note Details")
+	fmt.Println("------------------------------")
+	fmt.Printf("ID:      %d\n", note.ID)
+	fmt.Printf("Title:   %s\n", note.Title)
+	fmt.Printf("Content: %s\n", note.Content)
+	fmt.Println("------------------------------")
 }
