@@ -25,6 +25,9 @@ func main() {
 	case "create":
 		handleCreate(os.Args[2:])
 
+	case "list":
+		handleList()
+
 	default:
 		fmt.Println("Unknown command:", command)
 		showHelp()
@@ -37,6 +40,7 @@ func showHelp() {
 	fmt.Println("Available commands:")
 	fmt.Println("  help                              Show available commands")
 	fmt.Println("  create <title> <content>         Create a new note")
+	fmt.Println("  list                              List all notes")
 }
 
 func handleCreate(args []string) {
@@ -99,4 +103,30 @@ func nextNoteID(noteStore map[int]notes.Note) int {
 	}
 
 	return newID
+}
+
+func handleList() {
+	noteStore, err := loadNoteStore()
+	if err != nil {
+		fmt.Println("Loading error:", err)
+		return
+	}
+
+	if len(noteStore) == 0 {
+		fmt.Println("No notes found.")
+		return
+	}
+
+	fmt.Println("Your Notes")
+	fmt.Println("------------------------------")
+
+	for id, note := range noteStore {
+		fmt.Printf("ID:      %d\n", id)
+		fmt.Printf("Title:   %s\n", note.Title)
+		fmt.Printf("Content: %s\n", note.Content)
+		fmt.Println()
+	}
+
+	fmt.Println("------------------------------")
+	fmt.Printf("Total notes: %d\n", len(noteStore))
 }
