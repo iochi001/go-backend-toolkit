@@ -8,52 +8,95 @@ import (
 	"go-backend-toolkit/internal/storage"
 )
 
+const notesFile = "notes.json"
+
 func main() {
-	filename := "notes.json"
-
-	// Load existing notes.
-	noteStore, err := storage.LoadNotes(filename)
-
-	if err != nil {
-		if os.IsNotExist(err) {
-			noteStore = make(map[int]notes.Note)
-		} else {
-			fmt.Println("Loading error:", err)
-			return
-		}
+	if len(os.Args) < 2 {
+		showHelp()
+		return
 	}
+
+	command := os.Args[1]
+
+	switch command {
+	case "help":
+		showHelp()
+
+	case "create":
+		handleCreate(os.Args[2:])
+
+	default:
+		fmt.Println("Unknown command:", command)
+		showHelp()
+	}
+}
+
+func showHelp() {
+	fmt.Println("Go Backend Toolkit - Notes CLI")
+	fmt.Println()
+	fmt.Println("Available commands:")
+	fmt.Println("  help                              Show available commands")
+	fmt.Println("  create <title> <content>         Create a new note")
+}
+
+func handleCreate(args []string) {
+	if len(args) < 2 {
+		fmt.Println("Usage: go run . create <title> <content>")
+		return
+	}
+
+	noteStore, err := loadNoteStore()
+	if err != nil {
+		fmt.Println("Loading error:", err)
+		return
+	}
+
+	newID := nextNoteID(noteStore)
 
 	note := notes.Note{
-		ID:      1,
-		Title:   "Learning Go",
-		Content: "Understanding persistent storage",
+		ID:      newID,
+		Title:   args[0],
+		Content: args[1],
 	}
 
-	// Create the note.
-	err = notes.CreateNote(noteStore, note)
-
-	if err != nil {
+	if err := notes.CreateNote(noteStore, note); err != nil {
 		fmt.Println("Create error:", err)
-	} else {
-		fmt.Println("Note created successfully")
+		return
 	}
 
-	// Save notes.
-	err = storage.SaveNotes(filename, noteStore)
-
-	if err != nil {
+	if err := storage.SaveNotes(notesFile, noteStore); err != nil {
 		fmt.Println("Saving error:", err)
 		return
 	}
 
-	fmt.Println("Notes saved successfully")
+	fmt.Println("Note created successfully. ID:", newID)
+}
 
-	// Find the note.
-	foundNote, err := notes.FindNote(noteStore, 1)
+func loadNoteStore() (map[int]notes.Note, error) {
+	noteStore, err := storage.LoadNotes(notesFile)
 
 	if err != nil {
-		fmt.Println("Find error:", err)
-	} else {
-		fmt.Println("Found note:", foundNote.Title)
+		if os.IsNotExist(err) {
+			return make(map[int]notes.Note), nil
+		}
+		return nil, err
 	}
+
+	if noteStore == nil {
+		noteStore = make(map[int]notes.Note)
+	}
+
+	return noteStore, nil
+}
+
+func nextNoteID(noteStore map[int]notes.Note) int {
+	newID := 1
+
+	for id := range noteStore {
+		if id >= newID {
+			newID = id + 1
+		}
+	}
+
+	return newID
 }
