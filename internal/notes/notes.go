@@ -60,3 +60,14 @@ func UpdateNote(noteStore map[int]Note, id int, updatedNote Note) error {
 
 	return nil
 }
+
+
+func DeleteNote(noteStore map[int]Note, id int) error {
+    if _, exists := noteStore[id]; !exists {
+        return fmt.Errorf("note with ID %d not found", id)
+    }
+
+    delete(noteStore, id)
+
+    return nil
+}

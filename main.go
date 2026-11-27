@@ -36,6 +36,9 @@ func main() {
 	case "update":
 		handleUpdate(os.Args[2:])
 
+	case "delete":
+		handleDelete(os.Args[2:])
+
 	default:
 		fmt.Println("Unknown command:", command)
 		showHelp()
@@ -51,6 +54,7 @@ func showHelp() {
 	fmt.Println("  list                              List all notes")
 	fmt.Println("  view <id>                         View a note by ID")
 	fmt.Println("  update <id> <title> <content>    Update a note by ID")
+	fmt.Println("  delete <id>                       Delete a note by ID")
 }
 
 func handleCreate(args []string) {
@@ -225,4 +229,35 @@ func handleUpdate(args []string) {
 	}
 
 	fmt.Println("Note updated successfully. ID:", id)
+}
+
+func handleDelete(args []string) {
+	if len(args) < 1 {
+		fmt.Println("Usage: go run . delete <id>")
+		return
+	}
+
+	id, err := strconv.Atoi(args[0])
+	if err != nil {
+		fmt.Println("Invalid note ID. Please provide a number.")
+		return
+	}
+
+	noteStore, err := loadNoteStore()
+	if err != nil {
+		fmt.Println("Loading error:", err)
+		return
+	}
+
+	if err := notes.DeleteNote(noteStore, id); err != nil {
+		fmt.Println("Delete error:", err)
+		return
+	}
+
+	if err := storage.SaveNotes(notesFile, noteStore); err != nil {
+		fmt.Println("Saving error:", err)
+		return
+	}
+
+	fmt.Println("Note deleted successfully. ID:", id)
 }

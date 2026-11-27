@@ -119,3 +119,32 @@ func TestUpdateNoteWithInvalidContent(t *testing.T) {
 		t.Error("original note should remain unchanged after failed update")
 	}
 }
+
+func TestDeleteNote(t *testing.T) {
+	noteStore := map[int]Note{
+		1: {ID: 1, Title: "First", Content: "First note"},
+		2: {ID: 2, Title: "Second", Content: "Second note"},
+	}
+
+	err := DeleteNote(noteStore, 1)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	if _, exists := noteStore[1]; exists {
+		t.Fatal("expected note with ID 1 to be deleted")
+	}
+
+	if _, exists := noteStore[2]; !exists {
+		t.Fatal("expected note with ID 2 to remain")
+	}
+}
+
+func TestDeleteNonexistentNote(t *testing.T) {
+	noteStore := make(map[int]Note)
+
+	err := DeleteNote(noteStore, 99)
+	if err == nil {
+		t.Fatal("expected an error when deleting a nonexistent note")
+	}
+}
